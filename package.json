@@ -1,0 +1,24 @@
+{
+  "name": "genealogy",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "ts-node transform.ts",
+    "export:mermaid": "ts-node -r dotenv/config transform.ts",
+    "export:csv": "npm run export:mermaid && mmdc -i dist/ancestor.mermaid -o dist/ancestor.svg",
+    "export:png": "npm run export:mermaid && mmdc -i dist/ancestor.mermaid -o dist/ancestor.png"
+  },
+  "author": "DangerBlack",
+  "license": "ISC",
+  "devDependencies": {
+    "dotenv": "^8.2.0",
+    "typescript": "^4.0.2"
+  },
+  "dependencies": {
+    "@mermaid-js/mermaid-cli": "^8.7.0",
+    "axios": "^0.20.0",
+    "csv": "^5.3.2"
+  }
+}
