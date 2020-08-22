@@ -156,12 +156,12 @@ function build_flowchart_from_csv(csv: any)
     return flow_chart.join('\n');
 }
 
-async function convert_csv_to_yarml(url: string, file_name: string)
+async function convert_csv_to_flowchart(url: string, file_name: string)
 {
     const csv = await download_csv(url);
     const flow_chart = build_flowchart_from_csv(csv);
     fs.writeFileSync(file_name,flow_chart);
 }
 
-convert_csv_to_yarml(process.env.CSV_URL, path.join(process.env.OUT_FOLDER,'ancestor.mermaid'));
+convert_csv_to_flowchart(process.env.CSV_URL, path.join(process.env.OUT_FOLDER,'ancestor.mermaid'));
 
