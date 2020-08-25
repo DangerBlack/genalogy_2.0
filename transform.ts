@@ -141,11 +141,10 @@ function build_flowchart_from_csv(csv: any)
         const age_string = age ? `(${age})` : '';
         const gender_string = gender ? `:::${gender}` : '';      
 
-
         if(!marriage.endsWith('=') || common_ancestor)
         {
             flow_chart.push(`${marriage} --> ${nome}["${nome.replace(/_/gi,' ')}<br />${born_year} - ${death_year} ${age_string}"]${gender_string}`);
-            flow_chart.push(`linkStyle ${link_counter} stroke:${link_color}`);
+            flow_chart.push(`linkStyle ${link_counter} stroke:${link_color},stroke-width:2px`);
             link_counter++;
         }
         else
