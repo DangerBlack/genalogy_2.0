@@ -23,6 +23,20 @@ enum head
     'DETAILS'
 }
 
+interface Person
+{
+    name: string;
+    surname: string;
+    date_of_birth: string;
+    date_of_death: string;
+    birdthplace: string;
+    deathplace: string;
+    gender: string;
+    father_fullname: string;
+    mother_fullname: string;
+    details: string;
+}
+
 async function parse_wrapper(data: string)
 {
     return new Promise((resolve, reject) => 
@@ -36,11 +50,28 @@ async function parse_wrapper(data: string)
     });
 }
 
-async function download_csv(url: string): Promise<any>
+async function download_csv(url: string): Promise<Person[]>
 {
     const response = await axios.get(url);
-    const values = await parse_wrapper(response.data);
-    return (values as string[][]).slice(1);
+    const values = await parse_wrapper(response.data) as string[][];
+
+    const persons = values.map(value => {
+        const person: Person = {
+            name: value[head.NAME],
+            surname: value[head.SURNAME],
+            date_of_birth: value[head.DATE_OF_BIRDTH],
+            birdthplace: value[head.BIRDTHPLACE],
+            date_of_death: value[head.DATE_OF_DEATH],
+            deathplace: value[head.DEATHPALCE],
+            gender: value[head.GENDER],
+            father_fullname: value[head.FATHER_FULLNAME],
+            mother_fullname: value[head.MOTHER_FULLNAME],
+            details: value[head.DETAILS],
+        };
+        return person;
+    });
+
+    return persons.slice(1);
 }
 
 function generate_unkown(last_name?: string)
@@ -73,13 +104,13 @@ function get_age(born_year: string, death_year: string)
     return parseInt(death_year, 10) - parseInt(born_year, 10);
 }
 
-function is_common_ancestor(csv: any, madre: string, padre:string)
+function is_common_ancestor(csv: Person[], madre: string, padre:string)
 {
     let count = 0;
     for(const person of csv)
     {
-        const padre_son = person[head.FATHER_FULLNAME].trim() !== '' ? person[head.FATHER_FULLNAME].trim().replace(/ /gi,'_') : generate_unkown(person[head.SURNAME].trim().replace(/ /gi,'_'));
-        const madre_son = person[head.MOTHER_FULLNAME].trim() !== '' ? person[head.MOTHER_FULLNAME].trim().replace(/ /gi,'_') : person[head.MOTHER_FULLNAME] || '';
+        const padre_son = person.father_fullname.trim() !== '' ? person.father_fullname.trim().replace(/ /gi,'_') : generate_unkown(person.surname.trim().replace(/ /gi,'_'));
+        const madre_son = person.mother_fullname.trim() !== '' ? person.mother_fullname.trim().replace(/ /gi,'_') : person.mother_fullname || '';
         
         if(madre_son === madre && padre_son === padre)
             count++;
@@ -87,7 +118,7 @@ function is_common_ancestor(csv: any, madre: string, padre:string)
 
     return count > 1;
 }
-
+[head.MOTHER_FULLNAME]
 function get_simbol_gender(gender: string)
 {
     if(!gender)
@@ -99,7 +130,7 @@ function get_simbol_gender(gender: string)
     return FEMALE_SIMBOL;
 }
 
-function build_flowchart_from_csv(csv: any)
+function build_flowchart_from_csv(csv: Person[])
 {
     let flow_chart: string[] = [];
     let family_color = {};
@@ -112,16 +143,16 @@ function build_flowchart_from_csv(csv: any)
     let link_counter = 0;
     for(const person of csv)
     {
-        const padre = person[head.FATHER_FULLNAME].trim() !== '' ? person[head.FATHER_FULLNAME].trim().replace(/ /gi,'_') : generate_unkown(person[head.SURNAME].trim().replace(/ /gi,'_'));
-        const madre = person[head.MOTHER_FULLNAME].trim() !== '' ? person[head.MOTHER_FULLNAME].trim().replace(/ /gi,'_') : person[head.MOTHER_FULLNAME] || '';
-        const born_year = get_date(person[head["DATE_OF_BIRDTH"]]);
-        const death_year = person[head["DATE_OF_DEATH"]] ? get_date(person[head["DATE_OF_DEATH"]]) : '';
+        const padre = person.father_fullname.trim() !== '' ? person.father_fullname.trim().replace(/ /gi,'_') : generate_unkown(person.surname.trim().replace(/ /gi,'_'));
+        const madre = person.mother_fullname.trim() !== '' ? person.mother_fullname.trim().replace(/ /gi,'_') : person.mother_fullname || '';
+        const born_year = get_date(person.date_of_birth);
+        const death_year = person.date_of_death ? get_date(person.date_of_death) : '';
         const age = get_age(born_year, death_year);
-        const gender = person[head['GENDER']];
+        const gender = person.gender;
  
         const marriage = `${padre}=${madre}`;
-        const family_name = person[head.SURNAME] ? person[head.SURNAME].trim().replace(/ /gi,'_') : 'missing';
-        const nome = `${person[head.NAME].trim()} ${person[head.SURNAME].trim()}`.trim().replace(/ /gi,'_');
+        const family_name = person.surname ? person.surname.trim().replace(/ /gi,'_') : 'missing';
+        const nome = `${person.name.trim()} ${person.surname.trim()}`.trim().replace(/ /gi,'_');
 
         let link_color = COLOR_CODE[used_color_code];
 
@@ -134,7 +165,7 @@ function build_flowchart_from_csv(csv: any)
         }
 
         const common_ancestor = is_common_ancestor(csv, madre, padre)
-        if(person[head.FATHER_FULLNAME].trim() !== '' && !flow_chart.includes(`${padre} --> ${marriage}`))
+        if(person.father_fullname.trim() !== '' && !flow_chart.includes(`${padre} --> ${marriage}`))
         {
             flow_chart.push(`${marriage}(Marriage)`);
             flow_chart.push(`${padre} --> ${marriage}`);
@@ -146,7 +177,7 @@ function build_flowchart_from_csv(csv: any)
             flow_chart.push(`${marriage}[[Missing ancestor]]`);
 
 
-        if(person[head.MOTHER_FULLNAME].trim() !== '' && !flow_chart.includes(`${madre} --> ${marriage}`))
+        if(person.mother_fullname.trim() !== '' && !flow_chart.includes(`${madre} --> ${marriage}`))
         {
             flow_chart.push(`${madre} --> ${marriage}`);
             // flow_chart.push(`linkStyle ${link_counter} stroke:${link_color},stroke-width:2px`);
