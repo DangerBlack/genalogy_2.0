@@ -8,7 +8,7 @@ The csv file can be created with a gsheet template
 
 the header must contain
 
-|Nome|Cognome|data nascita|luogo nascita|data morte|luogo morte|sesso|padre|madre|dettagli|salma|
+|name|surname|date of birdth|birdthplace|date of death|deathplace |gender|father's name|mother's name|details|salma|
 
 # .env file
 
