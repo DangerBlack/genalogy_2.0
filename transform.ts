@@ -138,6 +138,7 @@ function build_flowchart_from_csv(csv: any)
         {
             flow_chart.push(`${marriage}(Marriage)`);
             flow_chart.push(`${padre} --> ${marriage}`);
+            flow_chart.push(`linkStyle ${link_counter} stroke:${link_color},stroke-width:2px`);
             link_counter++;
         }
 
@@ -148,6 +149,7 @@ function build_flowchart_from_csv(csv: any)
         if(person[head.MOTHER_FULLNAME].trim() !== '' && !flow_chart.includes(`${madre} --> ${marriage}`))
         {
             flow_chart.push(`${madre} --> ${marriage}`);
+            // flow_chart.push(`linkStyle ${link_counter} stroke:${link_color},stroke-width:2px`);
             link_counter++;
         }
 
