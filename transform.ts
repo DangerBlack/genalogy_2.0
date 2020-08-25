@@ -3,9 +3,11 @@ import {parse} from 'csv';
 import * as fs from 'fs';
 import * as path from 'path';
 
-const COLOR_CODE = ['#5f0b2b', '#d11638', '#f08801', '#face00', '#ada20b', '#d6e738', '#fb97ab', '#27c346', '#fda7c5', '#fdcbea', '#8173c6', '#b9eaee', '#a52fa5', '#7260c6', '#e1c6fb', '#f7b193', '#e4c029'];
+const COLOR_CODE = ['#77b583', '#c5e6df', '#6b6157', '#f28a7e', '#ffb8ab'];
 const COLOR_MALE = '#ccf2ff';
 const COLOR_FEMALE = '#ffe6ff';
+const MALE_SIMBOL = '♂';
+const FEMALE_SIMBOL = '♀';
 
 enum head
 {
@@ -86,6 +88,17 @@ function is_common_ancestor(csv: any, madre: string, padre:string)
     return count > 1;
 }
 
+function get_simbol_gender(gender: string)
+{
+    if(!gender)
+        return '';
+    
+    if(gender === 'M')
+        return MALE_SIMBOL;
+    
+    return FEMALE_SIMBOL;
+}
+
 function build_flowchart_from_csv(csv: any)
 {
     let flow_chart: string[] = [];
@@ -139,18 +152,22 @@ function build_flowchart_from_csv(csv: any)
         }
 
         const age_string = age ? `(${age})` : '';
-        const gender_string = gender ? `:::${gender}` : '';      
+        const gender_string = get_simbol_gender(gender);      
 
         if(!marriage.endsWith('=') || common_ancestor)
         {
-            flow_chart.push(`${marriage} --> ${nome}["${nome.replace(/_/gi,' ')}<br />${born_year} - ${death_year} ${age_string}"]${gender_string}`);
+            flow_chart.push(`${marriage} --> ${nome}["${nome.replace(/_/gi,' ')} ${gender_string}<br />${born_year} - ${death_year} ${age_string}"]:::${family_name}`);
             flow_chart.push(`linkStyle ${link_counter} stroke:${link_color},stroke-width:2px`);
             link_counter++;
         }
         else
-            flow_chart.push(`${nome}["${nome.replace(/_/gi,' ')}<br />${born_year} - ${death_year} ${age_string}"]${gender_string}`);
-
+            flow_chart.push(`${nome}["${nome.replace(/_/gi,' ')} ${gender_string}<br />${born_year} - ${death_year} ${age_string}"]:::${family_name}`);
     }  
+
+    for(const name of Object.keys(family_color))
+    {
+        flow_chart.push(`classDef ${name} fill:${family_color[name]},stroke:${family_color[name]}`);
+    }
 
     return flow_chart.join('\n');
 }
