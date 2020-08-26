@@ -3,9 +3,10 @@ import {parse} from 'csv';
 import * as fs from 'fs';
 import * as path from 'path';
 
-const COLOR_CODE = ['#77b583', '#c5e6df', '#6b6157', '#f28a7e', '#ffb8ab'];
+const COLOR_CODE = ['#395191','#3b89b0','#69a2b3','#5e905d','#89a64a','#c3b43d','#fbcb08','#feb734','#f57337','#c33e3f','#c33fac','#7343a7'];
 const COLOR_MALE = '#ccf2ff';
 const COLOR_FEMALE = '#ffe6ff';
+const COLOR_MARRIAGE = '#e5dcd2';
 const MALE_SIMBOL = '♂';
 const FEMALE_SIMBOL = '♀';
 
@@ -118,7 +119,7 @@ function is_common_ancestor(csv: Person[], madre: string, padre:string)
 
     return count > 1;
 }
-[head.MOTHER_FULLNAME]
+
 function get_simbol_gender(gender: string)
 {
     if(!gender)
@@ -136,8 +137,10 @@ function build_flowchart_from_csv(csv: Person[])
     let family_color = {};
 
     flow_chart.push(`graph TD`);
-    flow_chart.push(`classDef M fill:${COLOR_MALE}`);
-    flow_chart.push(`classDef F fill:${COLOR_FEMALE}`);
+    // flow_chart.push(`classDef M fill:${COLOR_MALE}`);
+    // flow_chart.push(`classDef F fill:${COLOR_FEMALE}`);
+    flow_chart.push(`classDef Marriage fill: ${COLOR_MARRIAGE},stroke: ${COLOR_MARRIAGE},color: black`);
+    flow_chart.push(`classDef MissingAncestor fill: ${COLOR_MARRIAGE},stroke: black, color: black`);
     
     let used_color_code = 0;
     let link_counter = 0;
@@ -167,14 +170,14 @@ function build_flowchart_from_csv(csv: Person[])
         const common_ancestor = is_common_ancestor(csv, madre, padre)
         if(person.father_fullname.trim() !== '' && !flow_chart.includes(`${padre} --> ${marriage}`))
         {
-            flow_chart.push(`${marriage}(Marriage)`);
+            flow_chart.push(`${marriage}(Marriage):::Marriage`);
             flow_chart.push(`${padre} --> ${marriage}`);
-            flow_chart.push(`linkStyle ${link_counter} stroke:${link_color},stroke-width:2px`);
+            flow_chart.push(`linkStyle ${link_counter} stroke: ${link_color}, stroke-width: 2px`);
             link_counter++;
         }
 
         if(marriage.endsWith('=') && common_ancestor)
-            flow_chart.push(`${marriage}[[Missing ancestor]]`);
+            flow_chart.push(`${marriage}[[Missing ancestor]]:::MissingAncestor`);
 
 
         if(person.mother_fullname.trim() !== '' && !flow_chart.includes(`${madre} --> ${marriage}`))
@@ -190,7 +193,7 @@ function build_flowchart_from_csv(csv: Person[])
         if(!marriage.endsWith('=') || common_ancestor)
         {
             flow_chart.push(`${marriage} --> ${nome}["${nome.replace(/_/gi,' ')} ${gender_string}<br />${born_year} - ${death_year} ${age_string}"]:::${family_name}`);
-            flow_chart.push(`linkStyle ${link_counter} stroke:${link_color},stroke-width:2px`);
+            flow_chart.push(`linkStyle ${link_counter} stroke: ${link_color}, stroke-width: 2px`);
             link_counter++;
         }
         else
@@ -199,15 +202,31 @@ function build_flowchart_from_csv(csv: Person[])
 
     for(const name of Object.keys(family_color))
     {
-        flow_chart.push(`classDef ${name} fill:${family_color[name]},stroke:${family_color[name]}`);
+        flow_chart.push(`classDef ${name} fill: ${family_color[name]}, stroke: ${family_color[name]}, color: white`);
     }
 
     return flow_chart.join('\n');
 }
 
+function order_person(a: Person, b: Person)
+{
+    if(a.surname === b.surname)
+    {
+        return get_date(a.date_of_birth) > get_date(b.date_of_birth) ? 1 : -1;
+    }
+
+    return a.surname > b.surname ? 1 : -1;
+}
+
 async function convert_csv_to_flowchart(url: string, file_name: string)
 {
     const csv = await download_csv(url);
+
+    // const order = csv.sort((a: Person, b: Person) => order_person(a, b));
+
+    // for(const person of order)
+    //     console.log(person.name, person.surname);
+
     const flow_chart = build_flowchart_from_csv(csv);
     fs.writeFileSync(file_name,flow_chart);
 }
