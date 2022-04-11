@@ -1,3 +1,5 @@
+import './dotenv_config';
+
 import axios from 'axios';
 import {parse} from 'csv';
 import * as fs from 'fs';
@@ -24,7 +26,7 @@ enum head
     'DETAILS'
 }
 
-interface Person
+export interface Person
 {
     name: string;
     surname: string;
@@ -51,7 +53,7 @@ async function parse_wrapper(data: string)
     });
 }
 
-async function download_csv(url: string): Promise<Person[]>
+export async function download_csv(url: string): Promise<Person[]>
 {
     const response = await axios.get(url);
     const values = await parse_wrapper(response.data) as string[][];
@@ -83,7 +85,7 @@ function generate_unkown(last_name?: string)
     return 'unkown' + (Math.random()*100).toFixed(0);    
 }
 
-function get_date(date?: string)
+export function get_date(date?: string)
 {
     if(!date)
         return '?';
@@ -94,7 +96,7 @@ function get_date(date?: string)
     return date;
 }
 
-function get_age(born_year: string, death_year: string)
+export function get_age(born_year: string, death_year: string)
 {
     if(born_year === '?')
         return undefined;
@@ -208,7 +210,7 @@ function build_flowchart_from_csv(csv: Person[])
     return flow_chart.join('\n');
 }
 
-function order_person(a: Person, b: Person)
+export function order_person(a: Person, b: Person)
 {
     if(a.surname === b.surname)
     {
@@ -222,12 +224,12 @@ async function convert_csv_to_flowchart(url: string, file_name: string)
 {
     const csv = await download_csv(url);
 
-    // const order = csv.sort((a: Person, b: Person) => order_person(a, b));
+    const order = csv.sort((a: Person, b: Person) => order_person(a, b));
 
-    // for(const person of order)
-    //     console.log(person.name, person.surname);
+    for(const person of order)
+        console.log(person.name, person.surname);
 
-    const flow_chart = build_flowchart_from_csv(csv);
+    const flow_chart = build_flowchart_from_csv(order);
     fs.writeFileSync(file_name,flow_chart);
 }
 
