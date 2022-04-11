@@ -9,7 +9,7 @@
     "export:mermaid": "ts-node -r dotenv/config transform.ts",
     "export:mermaid:gantt": "ts-node -r dotenv/config transform_to_gantt.ts",
     "export:csv": "npm run export:mermaid && mmdc -i dist/ancestor.mermaid -o dist/ancestor.svg",
-    "export:png": "npm run export:mermaid && mmdc -i dist/ancestor.mermaid -o dist/ancestor.png"
+    "export:png": "npm run export:mermaid && mmdc -i dist/ancestor.mermaid -o dist/ancestor.png -w 8192"
   },
   "author": "DangerBlack",
   "license": "ISC",
